@@ -109,6 +109,67 @@ export default function DashboardPage() {
         <Header />
 
         <main className="p-6 space-y-8">
+  {/* Hero / Dashboard Title + Blob */}
+  <div className="relative flex flex-col items-center justify-center mb-6">
+     {/* Blob 1 - kiri atas */}
+  <motion.div
+    className="absolute top-0 left-0 w-50 h-40 rounded-full filter blur-3xl opacity-60"
+    style={{
+      background: "linear-gradient(135deg, #FF5F6D, #FFC371)",
+    }}
+    animate={{
+      x: [0, 40, -20, 0],
+      y: [0, 20, -10, 0],
+      scale: [1, 1.2, 0.9, 1],
+      rotate: [0, 15, -10, 0],
+      backgroundPosition: ["0% 0%", "50% 50%", "100% 100%", "0% 0%"], // untuk efek gradient bergerak
+    }}
+    transition={{
+      duration: 10,
+      repeat: Infinity,
+      repeatType: "mirror",
+      ease: "easeInOut",
+    }}
+  />
+
+  {/* Blob 2 - kanan bawah */}
+  <motion.div
+    className="absolute bottom-0 right-0 w-45 h-50 rounded-full filter blur-3xl opacity-50"
+    style={{
+background: "linear-gradient(135deg, #FFD54F, #FFB300)"
+    }}
+    animate={{
+      x: [0, -25, 15, 0],
+      y: [0, -20, 10, 0],
+      scale: [1, 1.15, 0.9, 1],
+      rotate: [0, 25, -15, 0],
+      backgroundPosition: ["0% 0%", "50% 50%", "100% 100%", "0% 0%"],
+    }}
+    transition={{
+      duration: 12,
+      repeat: Infinity,
+      repeatType: "mirror",
+      ease: "easeInOut",
+    }}
+  />
+   
+    <motion.h1
+      className="relative text-4xl font-bold text-gray-800 text-center z-10 mt-12"
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 1 }}
+    >
+      🏢 Fire Monitoring Dashboard
+    </motion.h1>
+    <motion.p
+      className="relative mt-2 text-gray-600 z-10 text-center mb-5"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 1.5 }}
+    >
+      Real-time monitoring for smoke, heat, and alert systems
+    </motion.p>
+  </div>
           {/* System Status + Fire Alert */}
           <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
             <motion.div
@@ -203,7 +264,7 @@ export default function DashboardPage() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                 <input
                   type="text"
-                  placeholder="Search heat sensors..."
+                  placeholder="Search rooms..."
                   value={heatSearch}
                   onChange={(e) => setHeatSearch(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-full focus:ring-2 focus:ring-blue-400 focus:outline-none"

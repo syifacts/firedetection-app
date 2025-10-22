@@ -53,61 +53,77 @@ export default function HeatDetectorTable({ data }: { data: HeatSensor[] }) {
 
       {/* Table */}
       <div className="overflow-hidden rounded-xl border border-gray-200 shadow-sm">
-        <table className="w-full text-sm text-center border-collapse">
-          <thead className="bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 uppercase text-xs tracking-wider">
-            <tr>
-              <th className="p-3 border">No.</th>
-              <th className="p-3 border">Room</th>
-              <th className="p-3 border">Floor</th>
-              <th className="p-3 border">Temp (°C)</th>
-              <th className="p-3 border">Status</th>
-            </tr>
-          </thead>
+<table className="w-full text-sm text-center border-collapse">
+  <thead className="bg-red-500/40 text-black uppercase text-xs tracking-wider backdrop-blur-sm">
+    <tr>
+      <th className="p-3 border-b border-white/30">No.</th>
+      <th className="p-3 border-b border-white/30">Room</th>
+      <th className="p-3 border-b border-white/30">Floor</th>
+      <th className="p-3 border-b border-white/30">Temp (°C)</th>
+      <th className="p-3 border-b border-white/30">Status</th>
+      <th className="p-3 border-b border-white/30">Action</th>
+    </tr>
+  </thead>
 
-          <tbody>
-            {paginatedData.length === 0 ? (
-              <tr>
-                <td colSpan={4} className="py-6 text-gray-500 italic">
-                  No heat detector data found.
-                </td>
-              </tr>
-            ) : (
-              paginatedData.map((sensor, i) => (
-                <motion.tr
-                  key={sensor.id}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className={`transition-all duration-300 ${
-                    sensor.status === "fire"
-                      ? "bg-red-100 hover:bg-red-200"
-                      : sensor.status === "hot"
-                      ? "bg-orange-100 hover:bg-orange-200"
-                      : sensor.status === "offline"
-                      ? "bg-gray-100 hover:bg-gray-200"
-                      : "bg-green-50 hover:bg-green-100"
-                  }`}
-                >
-                  <td className="border p-3 text-gray-700 font-medium">
-                    {startIdx + i + 1}
-                  </td>
-                  <td className="border p-3 font-semibold text-gray-900">
-                    {sensor.room}
-                  </td>
-                  <td className="border p-3 font-semibold text-gray-900">
-                    {sensor.floor}
-                  </td>
-                  <td className="border p-3 text-gray-700">
-                    {sensor.temperature}°
-                  </td>
-                  <td className="border p-3">
-                    <StatusBadge status={sensor.status} />
-                  </td>
-                </motion.tr>
-              ))
-            )}
-          </tbody>
-        </table>
+  <tbody>
+    {paginatedData.length === 0 ? (
+      <tr>
+        <td colSpan={6} className="py-6 text-gray-500 italic">
+          No heat detector data found.
+        </td>
+      </tr>
+    ) : (
+      paginatedData.map((sensor, i) => (
+        <motion.tr
+          key={sensor.id}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: i * 0.05 }}
+          className={`transition-all duration-300 rounded-lg ${
+            i % 2 === 0
+              ? "bg-white hover:bg-red-100"
+              : "bg-red-50 hover:bg-white/50"
+
+                                //               className={`transition-all duration-300 ${
+                  //   sensor.status === "fire"
+                  //     ? "bg-red-100 hover:bg-red-200"
+                  //     : sensor.status === "hot"
+                  //     ? "bg-orange-100 hover:bg-orange-200"
+                  //     : sensor.status === "offline"
+                  //     ? "bg-gray-100 hover:bg-gray-200"
+                  //     : "bg-green-50 hover:bg-green-100"
+                  // }`}
+          }`}
+        >
+          <td className="border-b border-white/30 p-3 text-gray-900 font-medium">
+            {startIdx + i + 1}
+          </td>
+          <td className="border-b border-white/30 p-3 font-semibold text-gray-900">
+            {sensor.room}
+          </td>
+          <td className="border-b border-white/30 p-3 text-gray-900">{sensor.floor}</td>
+          <td className="border-b border-white/30 p-3 text-gray-700">
+            {sensor.temperature}°
+          </td>
+          <td className="border-b border-white/30 p-3">
+            <StatusBadge status={sensor.status} />
+          </td>
+          <td className="border-b border-white/30 p-3">
+            <motion.button
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.96 }}
+              className="px-4 py-1.5 rounded-md bg-blue-500 text-white shadow hover:shadow-md hover:bg-blue-600 transition"
+            >
+              Adjust
+            </motion.button>
+          </td>
+        </motion.tr>
+      ))
+    )}
+  </tbody>
+</table>
+
+
       </div>
 
       {/* Pagination Controls */}
