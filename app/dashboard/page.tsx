@@ -101,6 +101,22 @@ export default function DashboardPage() {
       const matchSearch = s.room.toLowerCase().includes(heatSearch.toLowerCase());
       return matchFloor && matchStatus && matchSearch;
     });
+// Hitung rata-rata temperatur sensor heat
+const getAverageHeatTemperature = () => {
+  const temps = sensors
+    .filter((s) => s.type === "heat" && s.temperature !== undefined)
+    .map((s) => s.temperature!);
+  if (temps.length === 0) return 0;
+  const sum = temps.reduce((acc, t) => acc + t, 0);
+  return sum / temps.length;
+};
+
+// Tentukan status berdasarkan rata-rata temperatur
+const getHeatTemperatureStatus = (avgTemp: number): "Normal" | "Warning" | "Danger" => {
+  if (avgTemp >= 55) return "Danger";
+  if (avgTemp >= 40) return "Warning";
+  return "Normal";
+};
 
   return (
     <div className="flex min-h-screen bg-gray-50 text-gray-800">
@@ -297,12 +313,20 @@ background: "linear-gradient(135deg, #FFD54F, #FFB300)"
             <HeatDetectorTable data={filteredHeat} />
           </div>
 
-          {/* Sensor Overview */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <SensorChart sensors={sensors} />
-            <StatusCard title="Heat Sensor Overall" value="50°C" status="Temperature" />
-            <StatusCard title="Bell & Sirene" value="ON" status="Status" />
-          </div>
+         {/* Sensor Overview */}
+<div className="grid grid-cols-1 lg:grid-cols-3 gap-6 text-center">
+  <SensorChart sensors={sensors} />
+
+<StatusCard
+  title="Heat Sensor Overall"
+  value={`${getAverageHeatTemperature().toFixed(1)}°C`}
+  status={getHeatTemperatureStatus(getAverageHeatTemperature())}
+/>
+
+<StatusCard title="Bell & Sirene" value="ON" />
+
+</div>
+
         </main>
       </div>
     </div>
