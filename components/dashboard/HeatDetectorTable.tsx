@@ -112,7 +112,7 @@ export default function HeatDetectorTable({ data }: { data: HeatSensor[] }) {
             <motion.button
               whileHover={{ scale: 1.08 }}
               whileTap={{ scale: 0.96 }}
-              className="px-4 py-1.5 rounded-md bg-blue-500 text-white shadow hover:shadow-md hover:bg-blue-600 transition"
+              className="px-4 py-1.5 rounded-md bg-red-500 text-white shadow hover:shadow-md hover:bg-red-600 transition"
             >
               Adjust
             </motion.button>

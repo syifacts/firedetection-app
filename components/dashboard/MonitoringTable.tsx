@@ -13,6 +13,7 @@ export interface FireSensor {
   status: "offline" | "online" | "fire" | "hot";
   temperature?: number;
   lastUpdate: string;
+  value?: number;
 }
 
 export default function MonitoringTable({ data }: { data: FireSensor[] }) {

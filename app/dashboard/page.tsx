@@ -10,6 +10,7 @@ import SensorChart from "@/components/dashboard/SensorChart";
 import StatusCard from "@/components/dashboard/StatusCard";
 import HeatDetectorTable from "@/components/dashboard/HeatDetectorTable";
 import { Search } from "lucide-react";
+import BellStatusCard from "@/components/dashboard/BellStatusCard";
 
 interface FireSensor {
   id: number;
@@ -313,18 +314,24 @@ background: "linear-gradient(135deg, #FFD54F, #FFB300)"
             <HeatDetectorTable data={filteredHeat} />
           </div>
 
-         {/* Sensor Overview */}
+{/* Sensor Overview */}
 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 text-center">
-  <SensorChart sensors={sensors} />
+  {/* Smoke Sensor Chart di kiri, span 2 kolom di desktop */}
+  <div className="lg:col-span-2">
+    <SensorChart sensors={sensors} />
+  </div>
 
-<StatusCard
-  title="Heat Sensor Overall"
-  value={`${getAverageHeatTemperature().toFixed(1)}°C`}
-  status={getHeatTemperatureStatus(getAverageHeatTemperature())}
-/>
+  {/* Kanan atas: Heat Sensor StatusCard */}
+  <div className="flex flex-col gap-6">
+    <StatusCard
+      title="Heat Sensor Overall"
+      value={`${getAverageHeatTemperature().toFixed(1)}°C`}
+      status={getHeatTemperatureStatus(getAverageHeatTemperature())}
+    />
 
-<StatusCard title="Bell & Sirene" value="ON" />
-
+    {/* Kanan bawah: Bell & Sirene */}
+<BellStatusCard title="Bell & Sirene" />
+  </div>
 </div>
 
         </main>

@@ -29,7 +29,7 @@ export default function SensorChart({ sensors }: SensorChartProps) {
   const latestValue = data.length ? data[data.length-1].value : 0;
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-4">
+    <div className="bg-white rounded-xl shadow-md p-4 h-full">
       <h2 className="font-semibold text-lg mb-3">Smoke Sensor Overall</h2>
       <ResponsiveContainer width="100%" height={200}>
         <LineChart data={data}>
