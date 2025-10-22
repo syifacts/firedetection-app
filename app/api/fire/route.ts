@@ -12,6 +12,7 @@ export async function POST(req: NextRequest) {
   const newSensor: FireSensor = {
     id: Date.now(),
     room: body.room || "Unknown",
+    floor: body.floor,
     type: body.type || "smoke",
     status: body.status || "normal",
     temperature: body.temperature || 0,

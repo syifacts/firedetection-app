@@ -7,7 +7,7 @@ interface FireSensor {
   room: string;
   floor: string;
   type: "smoke" | "heat" | "bell" | "breaking";
-  status: "offline" | "online" | "fire";
+  status: "offline" | "online" | "fire" | "hot";
   value?: number;
   lastUpdate: string;
 }
