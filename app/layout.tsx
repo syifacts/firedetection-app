@@ -18,7 +18,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Fire Detection System",
+  title: "Fire Alarm System",
   icons: {
     icon: "/logokampus.png", 
   },

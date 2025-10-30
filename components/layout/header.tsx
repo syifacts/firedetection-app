@@ -40,7 +40,7 @@ const getInitials = (name: string): string => {
           className="object-contain"
           priority
         />
-        <h1 className="ml-5 text-xl font-bold text-white">Fire Detection System</h1>
+        <h1 className="ml-5 text-xl font-bold text-white">Fire Alarm System</h1>
       </div>
 
       {/* Notification + User */}

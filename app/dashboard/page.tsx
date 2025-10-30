@@ -70,6 +70,8 @@ useEffect(() => {
   };
 
   fetchSensors();
+    const interval = setInterval(fetchSensors, 5000); // fetch tiap 5 detik
+  return () => clearInterval(interval);
 }, []);
 
   // Summary counts

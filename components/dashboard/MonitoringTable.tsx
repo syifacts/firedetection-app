@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import StatusBadge from "./StatusBadge";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -18,18 +18,31 @@ export interface FireSensor {
 
 const statusOptions = ["offline", "online", "fire", "hot"];
 
-export default function MonitoringTable({ data, onUpdate }: { data: FireSensor[]; onUpdate?: () => void }) {
+export default function MonitoringTable({
+  data,
+  onUpdate,
+}: {
+  data: FireSensor[];
+  onUpdate?: () => void;
+}) {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
-  const [editId, setEditId] = useState<number | null>(null);
+  const [editSensor, setEditSensor] = useState<FireSensor | null>(null);
   const [editValues, setEditValues] = useState<Partial<FireSensor>>({});
 
   const totalPages = Math.ceil(data.length / rowsPerPage);
   const startIdx = (currentPage - 1) * rowsPerPage;
   const paginatedData = data.slice(startIdx, startIdx + rowsPerPage);
 
-  const startEdit = (sensor: FireSensor) => {
-    setEditId(sensor.id);
+  const handleChange = (field: keyof FireSensor, value: string) => {
+    setEditValues((vals) => ({ ...vals, [field]: value }));
+  };
+
+  const handlePrev = () => setCurrentPage((p) => Math.max(p - 1, 1));
+  const handleNext = () => setCurrentPage((p) => Math.min(p + 1, totalPages));
+
+  const openEdit = (sensor: FireSensor) => {
+    setEditSensor(sensor);
     setEditValues({
       room: sensor.room,
       floor: sensor.floor,
@@ -37,44 +50,40 @@ export default function MonitoringTable({ data, onUpdate }: { data: FireSensor[]
     });
   };
 
-  const handleChange = (field: keyof FireSensor, value: string) => {
-    setEditValues((vals) => ({ ...vals, [field]: value }));
+  const closeEdit = () => {
+    setEditSensor(null);
+    setEditValues({});
   };
 
-  const saveEdit = async (sensorId: number) => {
-    const sensor = data.find((s) => s.id === sensorId);
-    if (!sensor) return;
+  const saveEdit = async () => {
+    if (!editSensor) return;
 
-    // PUT request - type wajib selalu dikirim!
-    await fetch(`/api/fire/${sensorId}`, {
+    await fetch(`/api/fire/${editSensor.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        room: editValues.room ?? sensor.room,
-        floor: editValues.floor ?? sensor.floor,
-        status: editValues.status ?? sensor.status,
-        type: sensor.type,                        // field type selalu ikut
-        temperature: sensor.temperature,
+        room: editValues.room ?? editSensor.room,
+        floor: editValues.floor ?? editSensor.floor,
+        status: editValues.status ?? editSensor.status,
+        type: editSensor.type,
+        temperature: editSensor.temperature,
         lastUpdate: new Date().toISOString(),
       }),
     });
 
-    setEditId(null);
-    setEditValues({});
-    // Refresh data dari luar jika ada callback
+    closeEdit();
     if (onUpdate) onUpdate();
   };
 
-  const cancelEdit = () => {
-    setEditId(null);
-    setEditValues({});
+  const testSensor = async (sensorId: number) => {
+    await fetch(`/api/fire/${sensorId}/test`, {
+      method: "POST",
+    });
+    if (onUpdate) onUpdate();
   };
 
-  const handlePrev = () => setCurrentPage((p) => Math.max(p - 1, 1));
-  const handleNext = () => setCurrentPage((p) => Math.min(p + 1, totalPages));
-
   return (
-    <div className="bg-gradient-to-br from-white via-gray-50 to-red-50 rounded-2xl shadow-lg p-6 border border-gray-100">
+    <div className="bg-gradient-to-br from-white via-gray-50 to-red-50 rounded-2xl shadow-lg p-6 border border-gray-100 relative">
       <div className="flex justify-between items-center mb-4">
         <h2 className="font-bold text-2xl text-gray-800 flex items-center gap-2">
           🚨 Smoke Detector
@@ -106,7 +115,7 @@ export default function MonitoringTable({ data, onUpdate }: { data: FireSensor[]
               <th className="p-3 border-b border-white/30">Room</th>
               <th className="p-3 border-b border-white/30">Floor</th>
               <th className="p-3 border-b border-white/30">Status</th>
-              <th className="p-3 border-b border-white/30">Action</th>
+              <th className="p-3 border-b border-white/30">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -123,76 +132,41 @@ export default function MonitoringTable({ data, onUpdate }: { data: FireSensor[]
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: i * 0.05 }}
-                  className={i % 2 === 0 ? "bg-white hover:bg-red-100" : "bg-red-50 hover:bg-white/50"}
+                  className={
+                    i % 2 === 0
+                      ? "bg-white hover:bg-red-100"
+                      : "bg-red-50 hover:bg-white/50"
+                  }
                 >
                   <td className="border-b border-white/30 p-3 text-gray-900 font-medium">
                     {startIdx + i + 1}
                   </td>
                   <td className="border-b border-white/30 p-3 font-semibold text-gray-900">
-                    {editId === sensor.id ? (
-                      <input
-                        className="p-1 border rounded"
-                        value={editValues.room ?? ""}
-                        onChange={e => handleChange("room", e.target.value)}
-                      />
-                    ) : (
-                      sensor.room
-                    )}
+                    {sensor.room}
                   </td>
                   <td className="border-b border-white/30 p-3 text-gray-900">
-                    {editId === sensor.id ? (
-                      <input
-                        className="p-1 border rounded"
-                        value={editValues.floor ?? ""}
-                        onChange={e => handleChange("floor", e.target.value)}
-                      />
-                    ) : (
-                      sensor.floor
-                    )}
+                    {sensor.floor}
                   </td>
                   <td className="border-b border-white/30 p-3">
-                    {editId === sensor.id ? (
-                      <select
-                        className="p-1 border rounded"
-                        value={editValues.status ?? ""}
-                        onChange={e => handleChange("status", e.target.value)}
-                      >
-                        {statusOptions.map(opt => (
-                          <option key={opt} value={opt}>
-                            {opt}
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      <StatusBadge status={sensor.status} />
-                    )}
+                    <StatusBadge status={sensor.status} />
                   </td>
-                  <td className="border-b border-white/30 p-3">
-                    {editId === sensor.id ? (
-                      <>
-                        <button
-                          className="px-3 py-1 bg-green-500 text-white rounded mr-1"
-                          onClick={() => saveEdit(sensor.id)}
-                        >
-                          Save
-                        </button>
-                        <button
-                          className="px-3 py-1 bg-gray-300 rounded"
-                          onClick={cancelEdit}
-                        >
-                          Cancel
-                        </button>
-                      </>
-                    ) : (
-                      <motion.button
-                        whileHover={{ scale: 1.08 }}
-                        whileTap={{ scale: 0.96 }}
-                        className="px-4 py-1.5 rounded-md bg-red-500 text-white shadow hover:shadow-md hover:bg-red-600 transition"
-                        onClick={() => startEdit(sensor)}
-                      >
-                        Adjust
-                      </motion.button>
-                    )}
+                  <td className="border-b border-white/30 p-3 flex justify-center gap-2">
+                    <motion.button
+                      whileHover={{ scale: 1.08 }}
+                      whileTap={{ scale: 0.96 }}
+                      className="px-3 py-1 rounded-md bg-blue-500 text-white hover:bg-blue-600"
+                      onClick={() => openEdit(sensor)}
+                    >
+                      Edit
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.08 }}
+                      whileTap={{ scale: 0.96 }}
+                      className="px-3 py-1 rounded-md bg-red-500 text-white hover:bg-red-600"
+                      onClick={() => testSensor(sensor.id)}
+                    >
+                      Test
+                    </motion.button>
                   </td>
                 </motion.tr>
               ))
@@ -235,7 +209,9 @@ export default function MonitoringTable({ data, onUpdate }: { data: FireSensor[]
               onClick={handleNext}
               disabled={currentPage === totalPages}
               className={`flex items-center gap-1 px-3 py-1.5 rounded-md border text-gray-700 hover:bg-gray-100 transition ${
-                currentPage === totalPages ? "opacity-50 cursor-not-allowed" : ""
+                currentPage === totalPages
+                  ? "opacity-50 cursor-not-allowed"
+                  : ""
               }`}
             >
               Next <ChevronRight size={16} />
@@ -243,6 +219,84 @@ export default function MonitoringTable({ data, onUpdate }: { data: FireSensor[]
           </div>
         </div>
       )}
+
+      {/* Popup Edit */}
+      <AnimatePresence>
+        {editSensor && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 flex items-center justify-center bg-black/50 z-50"
+          >
+            <motion.div
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.8 }}
+              className="bg-white rounded-xl shadow-xl p-6 w-[90%] max-w-md"
+            >
+              <h3 className="text-xl font-semibold mb-4 text-gray-800">
+                Edit Sensor #{editSensor.id}
+              </h3>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Room
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full border rounded p-2"
+                    value={editValues.room ?? ""}
+                    onChange={(e) => handleChange("room", e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Floor
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full border rounded p-2"
+                    value={editValues.floor ?? ""}
+                    onChange={(e) => handleChange("floor", e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Status
+                  </label>
+                  <select
+                    className="w-full border rounded p-2"
+                    value={editValues.status ?? ""}
+                    onChange={(e) => handleChange("status", e.target.value)}
+                  >
+                    {statusOptions.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 mt-5">
+                <button
+                  onClick={closeEdit}
+                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={saveEdit}
+                  className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                >
+                  Save
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
