@@ -1,28 +1,21 @@
-// pages/api/fire/[id]/tes.ts
+// app/api/fire/[id]/tes/route.ts
 
-import type { NextApiRequest, NextApiResponse } from "next";
-
-// ganti baseUrl dan path sesuai endpoint HTTP-in Node-RED kamu
-const nodeRedBaseUrl = "http://127.0.0.1:1880"; // atau IP Node-RED server-mu
-
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
-
-  const { id } = req.query;
+export async function POST(request: Request, { params }: { params: { id: string } }) {
+  const { id } = params;
   if (!id) {
-    return res.status(400).json({ error: "Sensor id is required" });
+    return new Response(JSON.stringify({ error: "Sensor id is required" }), { status: 400 });
   }
 
-  // Endpoint di Node-RED di mana uji smoke (test) diproses:
+  const nodeRedBaseUrl = "http://127.0.0.1:1880";
   const nodeRedUrl = `${nodeRedBaseUrl}/smoke-${id}-test`;
 
   try {
     const fetchRes = await fetch(nodeRedUrl, { method: "POST" });
     const data = await fetchRes.text();
-    return res.status(200).json({ ok: true, data });
+    return new Response(JSON.stringify({ ok: true, data }), { status: 200 });
   } catch (error) {
-    return res.status(500).json({ error: "Failed to trigger device", details: error });
+    return new Response(JSON.stringify({ error: "Failed to trigger device", details: error }), {
+      status: 500,
+    });
   }
 }
