@@ -1,9 +1,12 @@
 "use client";
 
-import { Home, Clock, Settings, LogOut, Menu } from "lucide-react";
+import { Home, Settings, LogOut, Menu } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -11,13 +14,18 @@ export default function Sidebar() {
 
   const navItems = [
     { label: "Dashboard", href: "/dashboard", icon: <Home size={18} /> },
-    { label: "Log & History", href: "/logs", icon: <Clock size={18} /> },
+   // { label: "Log & History", href: "/logs", icon: <Clock size={18} /> },
   ];
 
   const bottomItems = [
     { label: "Settings", href: "/settings", icon: <Settings size={18} /> },
   ];
+const router = useRouter();
 
+const handleLogout = () => {
+  localStorage.removeItem("token"); // hapus token login
+  router.push("/login"); // redirect ke halaman login
+};
   return (
     <>
       {/* Mobile toggle button */}
@@ -33,11 +41,19 @@ export default function Sidebar() {
         ${open ? "translate-x-0" : "-translate-x-full"} 
         shadow-lg border-r border-gray-200`}
       >
-        {/* Logo */}
-        <div className="flex flex-col items-center mb-8">
-          <img src="/logokampus.png" alt="Logo" className="w-30 h-30 rounded-full" />
-          {/* <h1 className="mt-2 font-semibold text-gray-800 text-center">Fire Detection</h1> */}
-        </div>
+ {/* Logo */}
+<div className="flex flex-col items-center mb-8">
+  <div className="relative w-24 h-24"> {/* atur ukuran sesuai kebutuhan */}
+    <Image
+      src="/logokampus.png"
+      alt="Logo"
+      fill // agar mengisi parent container
+      className="rounded-full object-cover" // agar bulat dan proporsional
+      priority // optional: supaya cepat di-load
+    />
+  </div>
+  {/* <h1 className="mt-2 font-semibold text-gray-800 text-center">Fire Detection</h1> */}
+</div>
 
         {/* Navigation */}
         <nav className="flex-1 space-y-2">
@@ -76,9 +92,13 @@ export default function Sidebar() {
             );
           })}
 
-          <button className="flex items-center gap-3 p-2 hover:bg-red-100 rounded-md w-full text-gray-600 transition-colors">
-            <LogOut size={18} /> Log Out
-          </button>
+         <button
+  onClick={handleLogout}
+  className="flex items-center gap-3 p-2 hover:bg-red-100 rounded-md w-full text-gray-600 transition-colors"
+>
+  <LogOut size={18} /> Log Out
+</button>
+
         </div>
       </aside>
     </>

@@ -1,0 +1,65 @@
+[
+  {
+    "id": 1761632288757,
+    "room": "Ruang Basa",
+    "floor": 1,
+    "type": "bell",
+    "status": "fire",
+    "temperature": 0,
+    "lastUpdate": "2025-10-29T07:00:26.062Z"
+  },
+  {
+    "id": 1761632297125,
+    "room": "Ruang Basa1",
+    "floor": 1,
+    "type": "smoke",
+    "status": "online",
+    "temperature": 30,
+    "lastUpdate": "2025-10-28T06:54:05.262Z"
+  },
+  {
+    "id": 1761632306237,
+    "room": "Ruang Basa",
+    "floor": 1,
+    "type": "heat",
+    "status": "online",
+    "temperature": 30,
+    "lastUpdate": "2025-10-28T09:17:56.880Z"
+  },
+  {
+    "id": 1761643383089,
+    "room": "Heat 1",
+    "floor": 1,
+    "type": "heat",
+    "status": "normal",
+    "temperature": 30.4,
+    "lastUpdate": "2025-10-29T07:25:03.526Z"
+  },
+  {
+    "id": 1761720438251,
+    "room": "Unknown",
+    "floor": 1,
+    "type": "heat",
+    "status": "online",
+    "temperature": 0,
+    "lastUpdate": "2025-10-29T06:47:18.251Z"
+  },
+  {
+    "id": 1761720834272,
+    "room": "Unknown",
+    "floor": 1,
+    "type": "smoke",
+    "status": "online",
+    "temperature": 0,
+    "lastUpdate": "2025-10-29T06:53:54.272Z"
+  },
+  {
+    "id": 1761720864108,
+    "room": "Smoke 1",
+    "floor": 1,
+    "type": "smoke",
+    "status": "online",
+    "temperature": 0,
+    "lastUpdate": "2025-10-29T06:54:24.108Z"
+  }
+]

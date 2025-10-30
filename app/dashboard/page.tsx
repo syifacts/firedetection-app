@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import Sidebar from "@/components/layout/sidebar";
+// import Sidebar from "@/components/layout/sidebar";
 import Header from "@/components/layout/header";
 import FireAlert from "@/components/dashboard/FireAlert";
 import MonitoringTable from "@/components/dashboard/MonitoringTable";
@@ -11,6 +11,9 @@ import StatusCard from "@/components/dashboard/StatusCard";
 import HeatDetectorTable from "@/components/dashboard/HeatDetectorTable";
 import { Search } from "lucide-react";
 import BellStatusCard from "@/components/dashboard/BellStatusCard";
+import { useRouter } from "next/navigation"; 
+import { Toaster, toast } from "react-hot-toast";
+
 
 interface FireSensor {
   id: number;
@@ -33,6 +36,8 @@ interface HeatSensorData {
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null); // null = loading
   const [sensors, setSensors] = useState<FireSensor[]>([]);
 
   // Filter MonitoringTable
@@ -43,20 +48,29 @@ export default function DashboardPage() {
   const [heatSearch, setHeatSearch] = useState("");
   const [heatFilters, setHeatFilters] = useState({ floor: "all", status: "all" });
 
-  useEffect(() => {
-    const fetchSensors = async () => {
-      try {
-        const res = await fetch("/api/fire", { cache: "no-store" });
-        if (!res.ok) throw new Error("Failed to fetch sensors");
-        const data = await res.json();
-        setSensors(data);
-      } catch (err) {
-        console.error("Error fetching sensors:", err);
-      }
-    };
 
-    fetchSensors();
-  }, []);
+useEffect(() => {
+  const fetchSensors = async () => {
+    try {
+      const res = await fetch("/api/fire", { cache: "no-store" });
+      if (!res.ok) throw new Error("Failed to fetch sensors");
+      
+      const data: FireSensor[] = await res.json();
+      
+      // 👇 Langsung konversi tanpa typeof check
+      const formattedData: FireSensor[] = data.map((s) => ({
+        ...s,
+        floor: `Floor ${s.floor}`  // 👈 langsung konversi number ke string
+      }));
+      
+      setSensors(formattedData);
+    } catch (err) {
+      console.error("Error fetching sensors:", err);
+    }
+  };
+
+  fetchSensors();
+}, []);
 
   // Summary counts
   const smokeCount = sensors.filter((s) => s.type === "smoke").length;
@@ -65,7 +79,11 @@ export default function DashboardPage() {
   const roomsCount = Array.from(new Set(sensors.map((s) => s.room))).length;
 
   // Filtered data MonitoringTable
-  const filteredSensors = sensors.filter((s) => {
+  const filteredSensors = sensors
+  .filter((s) => s.type === "smoke")  // 👈 hanya smoke
+  .filter((s) => {
+    // filter floor, status, search
+  
     const matchFloor = monitorFilters.floor === "all" || s.floor === monitorFilters.floor;
     const matchStatus = monitorFilters.status === "all" || s.status === monitorFilters.status;
     const matchSearch = s.room.toLowerCase().includes(monitorSearch.toLowerCase());
@@ -90,7 +108,7 @@ export default function DashboardPage() {
       return {
         id: s.id,
         room: s.room,
-        floor: s.floor,
+      floor: s.floor,  // 👈 konversi number ke "Floor 1"
         type: s.type,
         temperature: temp,
         status: derivedStatus,
@@ -119,11 +137,29 @@ const getHeatTemperatureStatus = (avgTemp: number): "Normal" | "Warning" | "Dang
   return "Normal";
 };
 
-  return (
-    <div className="flex min-h-screen bg-gray-50 text-gray-800">
-      <Sidebar />
-      <div className="flex-1 flex flex-col">
-        <Header />
+   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Anda harus login dulu", { duration: 3000 }); // toast muncul
+      setTimeout(() => router.replace("/login"), 1000); // redirect setelah 1 detik
+      setIsAuthenticated(false); // supaya component bisa update
+    } else {
+      setIsAuthenticated(true);
+    }
+  }, [router]);
+  // if (isAuthenticated === null) return null;
+  // if (isAuthenticated === false) return null; 
+
+ return (
+  <>
+    {/* Toaster selalu dirender */}
+    <Toaster position="top-center" />
+
+    {isAuthenticated ? (
+      <div className="flex min-h-screen bg-gray-50 text-gray-800">
+        {/* <Sidebar /> */}
+        <div className="flex-1 flex flex-col">
+          <Header />
 
         <main className="p-6 space-y-8">
   {/* Hero / Dashboard Title + Blob */}
@@ -337,5 +373,7 @@ background: "linear-gradient(135deg, #FFD54F, #FFB300)"
         </main>
       </div>
     </div>
+     ) : null}
+  </>
   );
 }

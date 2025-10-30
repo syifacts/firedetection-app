@@ -3,18 +3,48 @@
 import { useState, useEffect } from 'react';
 import { AlertTriangle, CheckCircle } from 'lucide-react';
 
+// 👇 Definisikan interface untuk FireSensor
+interface FireSensor {
+  id: number;
+  room: string;
+  floor: number;
+  type: "smoke" | "bell" | "heat" | string;
+  status: "online" | "fire" | "offline" | "hot" | "normal" | string;
+  temperature: number;
+  lastUpdate: string;
+}
+
 export default function FireAlert() {
   const [fireDetected, setFireDetected] = useState(false);
   const [alarmOn, setAlarmOn] = useState(false);
 
-  // Ambil status alarm dari API saat mount
+  // Ambil status alarm dari API /api/fire (filter type: "bell")
   useEffect(() => {
-    fetch('/api/alarm')
-      .then(res => res.json())
-      .then(data => {
-        setAlarmOn(data.alarm);
-        setFireDetected(data.alarm);
-      });
+    const fetchAlarmStatus = async () => {
+      try {
+        const res = await fetch('/api/fire', { cache: 'no-store' });
+        const data: FireSensor[] = await res.json();  // 👈 gunakan tipe FireSensor[]
+        
+        // Filter sensor tipe bell untuk room tertentu
+        const bellSensor = data.find(
+          (s) => s.type === "bell" && s.room === "Ruang Basa"  // 👈 tidak pakai any lagi
+        );
+        
+        if (bellSensor) {
+          const isActive = bellSensor.status === "fire";
+          setAlarmOn(isActive);
+          setFireDetected(isActive);
+        }
+      } catch (err) {
+        console.error("Error fetching alarm status:", err);
+      }
+    };
+
+    fetchAlarmStatus();
+    
+    // Polling setiap 5 detik untuk update real-time
+    const interval = setInterval(fetchAlarmStatus, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   const toggleAlarm = async () => {
@@ -22,11 +52,17 @@ export default function FireAlert() {
     setAlarmOn(newStatus);
     setFireDetected(newStatus);
 
-    // Update status alarm di API
-    await fetch('/api/alarm', {
-      method: 'PUT',
+    // Kirim payload yang benar ke /api/fire
+    await fetch('/api/fire', {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ alarm: newStatus }),
+      body: JSON.stringify({
+        room: "Ruang Basa",
+        floor: 1,
+        type: "bell",
+        status: newStatus ? "fire" : "online",
+        temperature: 0
+      }),
     });
   };
 
