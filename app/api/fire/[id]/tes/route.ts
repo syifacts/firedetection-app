@@ -1,9 +1,15 @@
 // app/api/fire/[id]/tes/route.ts
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
-  const { id } = params;
+import { NextRequest, NextResponse } from 'next/server';
+
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+
   if (!id) {
-    return new Response(JSON.stringify({ error: "Sensor id is required" }), { status: 400 });
+    return NextResponse.json({ error: "Sensor id is required" }, { status: 400 });
   }
 
   const nodeRedBaseUrl = "http://127.0.0.1:1880";
@@ -12,10 +18,11 @@ export async function POST(request: Request, { params }: { params: { id: string 
   try {
     const fetchRes = await fetch(nodeRedUrl, { method: "POST" });
     const data = await fetchRes.text();
-    return new Response(JSON.stringify({ ok: true, data }), { status: 200 });
+    return NextResponse.json({ ok: true, data }, { status: 200 });
   } catch (error) {
-    return new Response(JSON.stringify({ error: "Failed to trigger device", details: error }), {
-      status: 500,
-    });
+    return NextResponse.json(
+      { error: "Failed to trigger device", details: error },
+      { status: 500 }
+    );
   }
 }
